@@ -1,0 +1,37 @@
+slack
+google forms/class/drive/docs
+zoom
+asana
+timedoctor
+
++ Iframes are not working with an error of: Refused to display 'https://178.128.16.246/wp-admin/plugin-install.php?tab=plugin-information&plugin=akismet&' in a frame because it set multiple 'X-Frame-Options' headers with conflicting values ('DENY, SAMEORIGIN'). Falling back to 'deny'.
+- further investigation showed that it was a server setting ‘X-Frame-Options’ that was blocking all activity in iframes if it was set to ‘DENY’. It would only allow iframe activity if ‘X-Frame-Options’ was set to ‘SAMEORIGIN’ rather than ‘DENY’
+- Looking into how to set the ‘X-Frame-Options’ setting in apache, https://geekflare.com/secure-apache-from-clickjacking-with-x-frame-options/ said to add the line ‘Header always append X-Frame-Options SAMEORIGIN’ to .htaccess.
+	- Setting it in .htaccess did not work, nor in apache.conf
+	- The issue was resolved by restarting the apache server, apparently the changes were not being reflected until the server was restarted
+
+slack
+- Check if slack has a login API
+- Try the slack plugin
++ Setup a slack channel to emulate their attendance channel
+- Then install the slack plugin and make it send a custom message in the slack channel whenever the user posts something
+- Slack plugin by Akeda Bagus is not showing up in the plugins section of wordpress. 
+- Why? If we cannot install the plugin we cannot test it
+- Is it possible to use the alternative slack plugin by dorzki instead?
+- Akeda Bagus’ Slack plugin has a warning saying that it is out of date and may not work with the latest wordpress versions. Is this why it’s not appearing?
+- Try finding out if directly using the slack API for automated logins is possible in PHP
+- Look into slack tokens and see how they work
+- Add a simple link that opens slack in a new tab
+- Remembering login details are provided by the browser. This works somewhat automatically, so what does Ryan mean by fully-automated? Does he want to embed the slack interface right within the website? That’s gotta be really hard to do. Slack itself already takes up lot of CPU processes and RAM, if you run Slack within another website it’s sure to be crazy inefficient.
+- Does Ryan perhaps only need certain functionality from slack? For example, the ability to automatically post messages to the slack attendance channel whenever a user logs in?
+- Make a link on the page z.php that will send ‘Hello World’ to the #general channel of https://nopiehere.slack.com when clicked
+- I was able to send a POST request to https://api.slack.com/methods/chat.postMessage with cURL, but the authentication was wrong: 
+curl --header "Content-Type: application/json" \
+  --request POST \
+  --data '{"token":"xxxxxxxxxxxxxxxxxxxxxxxx","channel":"#general","text":"Hello World"}' \
+  https://slack.com/api/chat.postMessage
+
+Reply:
+{"ok":false,"error":"not_authed","warning":"missing_charset","response_metadata":{"warnings":["missing_charset"]}}
+Authentication via token in the JSON body doesn’t seem to work, also I need to specify a charset.
+The problem is after changing the curl request to include multiple headers, it doesn’t seem to be able to parse multiple headers. 
